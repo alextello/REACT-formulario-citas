@@ -1,11 +1,29 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import Formulario from './components/Formulario';
 import Cita from './components/Cita';
 
 function App() {
 
+  //citas en localStorage
+  let citasIniciales = JSON.parse(localStorage.getItem('citas'));
+  if (!citasIniciales) {
+    citasIniciales = [];
+  }
+
   // arreglo de citas
-  const [citas, guardarCitas] = useState([]);
+  const [citas, guardarCitas] = useState(citasIniciales);
+
+  // Use effect para realizar ciertas operaciones cuando el state cambie
+
+  useEffect(() => {
+    let citasIniciales = JSON.parse(localStorage.getItem('citas'));
+    if (citasIniciales) {
+      localStorage.setItem('citas', JSON.stringify(citas));
+    } else {
+      localStorage.setItem('citas', JSON.stringify([]));
+    }
+  }, [citas]);
 
   // Función que tome las citas actuales y agregue la nueva
   const crearCita = (cita) => {
@@ -21,6 +39,9 @@ function App() {
     guardarCitas(nuevasCitas);
   }
 
+  // Mensaje condicional
+  const titulo = citas.length === 0 ? 'No hay citas' : 'Administra tus citas'
+
   return (
     <Fragment>
 
@@ -32,7 +53,7 @@ function App() {
               <Formulario crearCita={crearCita} />
             </div>
             <div className="one-half column">
-              <h2>Administrar citas</h2>
+              <h2>{titulo}</h2>
               {citas.map(cita => (
                 <Cita cita={cita} key={cita.id} eliminarCita={eliminarCita} />
               ))}
@@ -44,4 +65,8 @@ function App() {
   );
 }
 
+// Manera de documentar qué requieren nuestros componentes
+Formulario.protoTypes = {
+  crearCita: PropTypes.func.isRequired
+}
 export default App;
